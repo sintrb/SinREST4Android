@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.sin.rest;
 
 import java.util.ArrayList;
@@ -8,9 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
@@ -36,23 +37,73 @@ public class ResourceAccess {
 		return request;
 	}
 
+	public ResourceAccess accept(String mediaType) {
+		this.request.setHeader("Accept", mediaType);
+		return this;
+	}
+
+	public ResourceAccess accept(MediaType mediaType) {
+		return accept(mediaType.toString());
+	}
+
+	public ResourceAccess type(String mediaType) {
+		this.request.setHeader("Content-Type", mediaType);
+		return this;
+	}
+
+	public ResourceAccess type(MediaType mediaType) {
+		return type(mediaType.toString());
+	}
+
+	public HttpEntity rawRead(HttpEntity entity) throws Exception {
+		System.out.println("->" + request.getURI().toString());
+		if (entity != null) {
+			// POST Data
+			((HttpEntityEnclosingRequest) request).setEntity(entity);
+		}
+		HttpResponse httpResp = httpClient.execute(request);
+
+		if (httpResp.getStatusLine().getStatusCode() == HTTP_STATUSCODE_OK) {
+			return httpResp.getEntity();
+		} else {
+			throw new Exception("Status Code Error: " + httpResp.getStatusLine().getStatusCode());
+		}
+	}
+
 	public String read() {
-		String result = null;
+		return read(null, null);
+	}
+
+	public String read(Map<String, String> form) {
+		return read(form, null);
+	}
+
+	public String read(String text) {
+		return read(null, text);
+	}
+
+	public String read(Map<String, String> form, String text) {
+		HttpEntity resEntity = null;
+		HttpEntity reqEntity = null;
+		String res = null;
 		try {
-			HttpResponse httpResp = httpClient.execute(request);
-			if (httpResp.getStatusLine().getStatusCode() == HTTP_STATUSCODE_OK) {
-				result = EntityUtils.toString(httpResp.getEntity(), webResource.getEncode());
-				System.out.println("方式请求成功，返回数据如下：\n" + result);
-			} else {
-				System.err.println("方式请求失败");
+			if (form != null) {
+				reqEntity = new UrlEncodedFormEntity(keyValueToValuePairList(form), webResource.getEncode());
+			} else if (text != null) {
+				reqEntity = new StringEntity(text, webResource.getEncode());
 			}
+			resEntity = rawRead(reqEntity);
+			res = EntityUtils.toString(resEntity, webResource.getEncode());
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			request.abort();
 		}
-		return result;
+		System.out.println(res == null ? "" : res);
+		return res;
 	}
-	
-	static List<NameValuePair> keyValueToValuePairList(Map<String, String> paramsMap) {
+
+	static private List<NameValuePair> keyValueToValuePairList(Map<String, String> paramsMap) {
 		final List<NameValuePair> dataList = new ArrayList<NameValuePair>();
 		for (Entry<String, String> entry : paramsMap.entrySet()) {
 			dataList.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
