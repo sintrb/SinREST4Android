@@ -10,6 +10,8 @@ public class MainTest {
 	public static void main(String[] args) {
 		SSLSocketFactory.getSocketFactory().setHostnameVerifier(new AllowAllHostnameVerifier());
 
+		
+		// Create a WebResource
 		WebResource resource = new WebResource("http://sinpy.sinaapp.com/rest/book/");
 //		WebResource resource = new WebResource("http://127.0.0.1:9011/rest/book/");
 
