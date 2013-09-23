@@ -1,7 +1,7 @@
 package com.sin.rest;
 
 /**
- * MediaType <br/>
+ * MediaType <br/> Resource Type
  * 
  * @author RobinTang {@link https://github.com/sintrb/SinREST4Android}
  */

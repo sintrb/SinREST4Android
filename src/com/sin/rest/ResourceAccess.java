@@ -33,30 +33,72 @@ public class ResourceAccess {
 		this.request = request;
 	}
 
+	/**
+	 * Get HTTP URI Request
+	 * 
+	 * @return HttpUriRequest
+	 */
 	public HttpUriRequest getRequest() {
 		return request;
 	}
 
+	/**
+	 * Set Accept resource type
+	 * 
+	 * @param mediaType
+	 *            Resource type
+	 * @return ResourceAccess
+	 */
 	public ResourceAccess accept(String mediaType) {
 		this.request.setHeader("Accept", mediaType);
 		return this;
 	}
 
+	/**
+	 * Set Accept resource type
+	 * 
+	 * @param mediaType
+	 *            Resource type
+	 * @return ResourceAccess
+	 */
 	public ResourceAccess accept(MediaType mediaType) {
 		return accept(mediaType.toString());
 	}
 
+	/**
+	 * Set Submit resource type
+	 * 
+	 * @param mediaType
+	 *            Resource type
+	 * @return ResourceAccess
+	 */
 	public ResourceAccess type(String mediaType) {
 		this.request.setHeader("Content-Type", mediaType);
 		return this;
 	}
 
+	/**
+	 * Set Submit resource type
+	 * 
+	 * @param mediaType
+	 *            Resource type
+	 * @return ResourceAccess
+	 */
 	public ResourceAccess type(MediaType mediaType) {
 		return type(mediaType.toString());
 	}
 
+	/**
+	 * Raw read from remote resource, it will return HttpEntity
+	 * 
+	 * @param entity
+	 *            HTTP Request Entity
+	 * @return HTTP Response Entity
+	 * @throws Exception
+	 */
 	public HttpEntity rawRead(HttpEntity entity) throws Exception {
-		System.out.println("->" + request.getURI().toString());
+		if (webResource.isTrace())
+			System.out.println("request: " + request.getURI().toString());
 		if (entity != null) {
 			// POST Data
 			((HttpEntityEnclosingRequest) request).setEntity(entity);
@@ -70,39 +112,75 @@ public class ResourceAccess {
 		}
 	}
 
+	/**
+	 * Read string from remote resource direct
+	 * 
+	 * @return String
+	 */
 	public String read() {
 		return read(null, null);
 	}
 
+	/**
+	 * Read string from remote resource by submit data form
+	 * 
+	 * @param form
+	 *            Data form
+	 * @return String
+	 */
 	public String read(Map<String, String> form) {
 		return read(form, null);
 	}
 
+	/**
+	 * Read string from remote resource by submit text entity
+	 * 
+	 * @param text
+	 *            Text entity
+	 * @return String
+	 */
 	public String read(String text) {
 		return read(null, text);
 	}
 
+	/**
+	 * Read string from remote resource
+	 * 
+	 * @param form
+	 *            Data form
+	 * @param text
+	 *            Text entity
+	 * @return String
+	 */
 	public String read(Map<String, String> form, String text) {
 		HttpEntity resEntity = null;
 		HttpEntity reqEntity = null;
 		String res = null;
 		try {
 			if (form != null) {
-				reqEntity = new UrlEncodedFormEntity(keyValueToValuePairList(form), webResource.getEncode());
+				reqEntity = new UrlEncodedFormEntity(keyValueToValuePairList(form), webResource.getLocalEncode());
 			} else if (text != null) {
-				reqEntity = new StringEntity(text, webResource.getEncode());
+				reqEntity = new StringEntity(text, webResource.getLocalEncode());
 			}
 			resEntity = rawRead(reqEntity);
-			res = EntityUtils.toString(resEntity, webResource.getEncode());
+			res = EntityUtils.toString(resEntity, webResource.getRemoteEncode());
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			request.abort();
 		}
-		System.out.println(res == null ? "" : res);
+		if (webResource.isTrace())
+			System.out.println("response: " + (res == null ? "" : res));
 		return res;
 	}
 
+	/**
+	 * Convert String Map to NameValuePair List
+	 * 
+	 * @param paramsMap
+	 *            String Map will be Converted
+	 * @return NameValuePair List
+	 */
 	static private List<NameValuePair> keyValueToValuePairList(Map<String, String> paramsMap) {
 		final List<NameValuePair> dataList = new ArrayList<NameValuePair>();
 		for (Entry<String, String> entry : paramsMap.entrySet()) {
