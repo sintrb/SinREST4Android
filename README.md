@@ -3,7 +3,7 @@ SinREST4Android
 
 A REST client library for Android development, but in fact it can be used on all Java platform, such as J2ME, J2SE, J2EE and so on.
 
-It't very easy to use it, in most time you can use it as follow:
+It't very easy to use it, in most time you can use it as this follow:
 
 <ul>
 <li>
