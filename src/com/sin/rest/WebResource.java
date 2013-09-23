@@ -11,6 +11,7 @@ import org.apache.http.client.methods.HttpPut;
  * @author RobinTang {@link https://github.com/sintrb/SinREST4Android}
  */
 public class WebResource {
+	public static final String VERSION = "1.0";
 	private String url;
 	private String remoteEncode = "utf-8";
 	private String localEncode = "utf-8";
