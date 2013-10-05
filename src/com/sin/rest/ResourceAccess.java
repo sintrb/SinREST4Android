@@ -101,6 +101,10 @@ public class ResourceAccess {
 			System.out.println("request: " + request.getURI().toString());
 		if (entity != null) {
 			// POST Data
+			if (webResource.isTrace() && StringEntity.class.isInstance(entity)){
+				System.out.print("request-data: \n");
+				((StringEntity)entity).writeTo(System.out);
+			}
 			((HttpEntityEnclosingRequest) request).setEntity(entity);
 		}
 		HttpResponse httpResp = httpClient.execute(request);
@@ -170,7 +174,7 @@ public class ResourceAccess {
 			request.abort();
 		}
 		if (webResource.isTrace())
-			System.out.println("response: " + (res == null ? "" : res));
+			System.out.println("response: \n" + (res == null ? "" : res));
 		return res;
 	}
 
