@@ -104,6 +104,7 @@ public class ResourceAccess {
 			if (webResource.isTrace() && StringEntity.class.isInstance(entity)){
 				System.out.print("request-data: \n");
 				((StringEntity)entity).writeTo(System.out);
+				System.out.print("\n");
 			}
 			((HttpEntityEnclosingRequest) request).setEntity(entity);
 		}
